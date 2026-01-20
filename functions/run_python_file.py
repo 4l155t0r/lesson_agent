@@ -1,0 +1,53 @@
+import os
+import subprocess
+
+def run_python_file(working_directory, file_path, args=None):
+    
+    working_dir_abs = os.path.abspath(working_directory)
+    target_file_abs = os.path.normpath(os.path.join(working_dir_abs, file_path))
+
+    # Check if the target path is in the approved working directory
+    valid_target_dir = os.path.commonpath([working_dir_abs, target_file_abs]) == working_dir_abs
+    if not valid_target_dir:
+        return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
+    
+    # Check if the target path is a file
+    if not os.path.isfile(target_file_abs):
+        return f'Error: "{file_path}" does not exist or is not a regular file'
+    
+    # Check if the file is a Python file
+    if not file_path.endswith('.py'):
+        return f'Error: "{file_path}" is not a Python file'
+    
+    # Construct the command to run the Python file
+    try:
+        command = ["python", target_file_abs]
+        # Add any additional arguments
+        if args:
+            command.extend(args)
+
+        CompletedProcess  = subprocess.run(
+            command, 
+            cwd=working_directory,
+            capture_output=True,
+            text=True,
+            timeout = 30
+        )
+
+        output_string = ""
+        if CompletedProcess.returncode != 0:
+            output_string += f"Process exited with code {CompletedProcess.returncode}"
+        if not CompletedProcess.stdout and not CompletedProcess.stderr:
+            output_string += "No output produced"
+        else:
+            if CompletedProcess.stdout:
+                output_string += f"STDOUT:\n{CompletedProcess.stdout}\n"
+            if CompletedProcess.stderr:
+                output_string += f"STDERR:\n{CompletedProcess.stderr}\n"
+
+        return output_string
+    except Exception as e:
+        return f"Error: executing Python file: {e}"
+
+    
+
