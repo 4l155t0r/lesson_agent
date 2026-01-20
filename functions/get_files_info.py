@@ -31,6 +31,7 @@ def get_files_info(working_directory, directory=""):
         return f'Error: "{directory}" is not a directory'
 
     try:
+        content = ""
         for item in os.listdir(target_dir_abs):
             item_path = os.path.join(target_dir_abs, item)
 
@@ -41,7 +42,8 @@ def get_files_info(working_directory, directory=""):
                 is_dir = False
 
             row_to_print = f"{item}: file_size={size} bytes, is_dir={is_dir}"
-            print(row_to_print)
+            content += row_to_print + "\n"
+        return content.strip()
     except Exception as e:
         return "Error: could not iterate over the items in the directory."
     
